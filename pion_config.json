@@ -1,0 +1,19 @@
+{
+    "sector_size": 512,
+    "block_size": 512,
+    "weight": 512,
+    "plot_format": "",
+    "plot_mode": "W",
+    "save_figures": false,
+    "plot_figures": true,
+    "time_period_start": 0.0,
+    "time_period_end": 42000.0,
+    "time_cover": 210.0,
+    "sector_start": 0,
+    "sector_end": 2500,
+    "parse_action": "W",
+    "parse_mode": "tlba",
+    "cut_seq": false,
+    "thread_mode": true,
+    "selected_thread": 0
+}
