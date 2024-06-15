@@ -6,13 +6,9 @@ import Checker as check
 def trace_process(g):
     # Trace
     # Check sudo permissions
-    rc = os.system("sudo -v &>/dev/null")
-    if rc != 0:
-        print("ERROR: You need to have sudo permissions to collect all necessary data.  Please run from a privilaged account.")
-        sys.exit(6)
-
-    os.system("fdisk -l -u=sectors "+g.device+" > fdisk."+g.device_str) # Get info about block device
-    os.system("rm -f blk.out.* &>/dev/null")                            # Cleanup previous mess
+    Commands.run_sys_cmd("sudo -v &>/dev/null")
+    Commands.run_sys_cmd("fdisk -l -u=sectors "+g.device+" > fdisk."+g.device_str) # Get info about block device
+    Commands.run_sys_cmd("rm -f blk.out.* &>/dev/null")                            # Cleanup previous mess
 
     runcount = g.runtime / g.timeout
     while runcount > 0:

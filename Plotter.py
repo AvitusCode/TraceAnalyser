@@ -13,13 +13,29 @@ def frequancy_formatter(x, pos):
     return "{}K".format(x)
 
 
+class LbaPack(object):
+    def __init__(self, lba = 0, predicted = False):
+        self.lba: int = lba
+        self.predicted: bool = predicted
+
+    def __iter__(self):
+        return iter([self.lba, self.predicted])
+    
+    def set_lba(self, lba: int):
+        self.lba = lba
+
+    def set_predicted(self, predicted: bool):
+        self.predicted = predicted
+
+
 class ConfigLbaOp(object):
-    def __init__(self, lba_axis_data, time_axis, secuanced, color, title) -> None:
+    def __init__(self, lba_axis_data, time_axis, secuanced, color, p_color='', title='') -> None:
         self.lba_axis_data = lba_axis_data
         self.time_axis = time_axis
         self.sequanced = secuanced
         self.color = color
-        self.title = title
+        self.p_color = p_color
+        self.title = title  
 
 
 def freq_hist(g, data, title, show=True, idx=0):
@@ -64,9 +80,26 @@ def prepare_some_plot(g, item, ax, title, x_label, y_label):
     ax.grid()
 
     weight = g.sector_size / g.weight
-    lba_print_data = [weight * lba for lba in item.lba_axis_data]
+    p_lba_data = []
+    p_time = []
+    lba_data = []
+    time = []
+    i = 0
 
-    ax.scatter(lba_print_data, item.time_axis, color=item.color, label=item.title, s=2)
+    for [lba, predicted] in item.lba_axis_data:
+        if predicted:
+            p_lba_data.append(lba * weight)
+            p_time.append(item.time_axis[i])
+        else:
+            lba_data.append(lba * weight)
+            time.append(item.time_axis[i])
+        i += 1
+
+    ax.scatter(lba_data, time, color=item.color, label=item.title + ' - simple', s=2)
+    if len(p_lba_data) != 0: 
+        ax.scatter(p_lba_data, p_time, color=item.p_color, label=item.title + ' - predicted', s=2)
+    
+    ax.legend()
 
 
 def prepare_seq_plot(g, item, ax, title, x_label, y_label):

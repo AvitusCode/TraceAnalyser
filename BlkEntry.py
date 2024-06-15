@@ -22,7 +22,7 @@ class BlkEntry(object):
         """
         return BlkEntry.FORMATTER.format(**self.__dict__)
     
-    def __iter_(self):
+    def __iter__(self):
         return iter(
             [
                 self.major,

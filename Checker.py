@@ -46,6 +46,10 @@ def verbose_print(g, message):
         print(message)
 
 
+def printf(format, *args):
+    sys.stdout.write(format % args)
+
+
 def check_trace_prereqs(g):
     debug_print(g, "check_trace_prereqs")
 
@@ -114,6 +118,8 @@ def load_config(g):
             g.time_cover = float(settings["time_cover"])
             g.thread_mode = bool(settings["thread_mode"])
             g.selected_thread = int(settings["selected_thread"])
+            g.with_predicted = bool(settings["with_predicted"])
+            g.pp_file = settings["pp_file"]
 
     except Exception as ex:
         print(f"Exception while reading json settings {ex=}, {type(ex)=}")
@@ -202,7 +208,7 @@ def regex_find(g, pattern, input):
 
         match = re.search(pattern, line)
         if match != None:
-            output =  match.groups()
+            output = match.groups()
             if g.verbose == True or g.debug == True:
                 print('MATCHED pattern')
             break

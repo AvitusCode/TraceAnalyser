@@ -206,7 +206,6 @@ def print_results(g):
         avg_theta = theta_total / theta_count
         med_theta = ((max_theta - min_theta) / 2 ) + min_theta
         approx_theta = (avg_theta + med_theta) / 2
-        #string = "avg_t=%s med_t=%s approx_t=%s min_t=%s max_t=%s\n" % (avg_theta, med_theta, approx_theta, min_theta, max_theta)
         check.verbose_print(g, "avg_t=%s med_t=%s approx_t=%s min_t=%s max_t=%s\n" % (avg_theta, med_theta, approx_theta, min_theta, max_theta))
         analysis_histogram_iops = "Approximate Zipfian Theta Range: %0.4f-%0.4f (est. %0.4f).\n" % (min_theta, max_theta, approx_theta)
         print(analysis_histogram_iops)

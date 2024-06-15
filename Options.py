@@ -2,7 +2,7 @@ from multiprocessing import Manager, Value
 
 class pIONOptions(object):
     def __init__(self):
-        self.version           = "0.0.3.a"                   # Version string
+        self.version           = "0.1.0"                     # Version string
         self.verbose           = False                       # Verbose logging (-v flag)
         self.debug             = False                       # Debug log level (-x flag)
         self.manager           = Manager()                   # Multiprocess sync object
@@ -73,5 +73,9 @@ class pIONOptions(object):
         self.sector_start       = 0
         self.sector_end         = 0
         self.cut_seq            = True          # cut sequential io from all trace
-        self.time_cover         = 1             # select timeperiod in seconds for block pattern analysis per time. 
+        self.time_cover         = 1             # select timeperiod in seconds for block pattern analysis per time.
+
+        # For predicted result
+        self.with_predicted     = False
+        self.pp_file            = "_"
         

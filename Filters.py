@@ -1,3 +1,7 @@
+from enum import Enum
+from Checker import debug_print
+
+
 LEGAL_ACTIONS = {
     "A",  # IO was remapped to a different device
     "B",  # IO bounced
@@ -15,6 +19,7 @@ LEGAL_ACTIONS = {
     "X",  # Split
 }
 
+
 LEGAL_RWBS = {
     "D",  # discard
     "W",  # write
@@ -26,6 +31,12 @@ LEGAL_RWBS = {
     "M",  # metadata
     "RS", # read sync
 }
+
+
+class FilterType(Enum):
+    SIMPLE = 1
+    PREDICTED = 2
+
 
 def action_filter(action):
     if action not in LEGAL_ACTIONS:
@@ -91,8 +102,7 @@ class FiltersFactory(object):
     def __init__(self, g) -> None:
         self.g = g
 
-    def get_filter(self):
-
+    def get_filter(self, type: FilterType):
         def filter_fn(entry):
             is_pass: bool = True
             
@@ -116,4 +126,16 @@ class FiltersFactory(object):
 
             return is_pass
         
-        return filter_fn
+        def p_filter_fn(entry):
+            if self.g.thread_mode:
+                return True
+            return self.g.selected_thread == entry.pid
+
+        match type:
+            case FilterType.SIMPLE:
+                return filter_fn
+            case FilterType.PREDICTED:
+                return p_filter_fn
+            case _:
+                debug_print(self.g, "Incorrect filter type!")
+            

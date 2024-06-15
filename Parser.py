@@ -3,8 +3,11 @@ import Checker as check
 from collections import Counter
 from functools import reduce
 from Filters import FiltersFactory
+from Filters import FilterType
 from BlkEntry import BlkEntry, SeqDetector
+from PredictedEntry import PredictedEntry
 import Plotter
+from Utility import Item, PairSet 
 from BlkWatcher import watch_block_pattern_per_time
 
 
@@ -24,12 +27,24 @@ def count_page_access(counter, arange):
     return counter
 
 
-def load_filtered_data(g, file, filters_factory):
-    filter_fn = filters_factory.get_filter()
+def load_filtered_data_simple(g, file, filters_factory):
+    filter_fn = filters_factory.get_filter(FilterType.SIMPLE)
     try:
         blk_entries = BlkEntry.generate_from_file(g, file)
         blk_entries = filter(filter_fn, blk_entries)
         return blk_entries
+    except Exception as ex:
+        print("ERROR: parse blk data" + repr(ex))
+
+    return None
+
+
+def load_filtered_data_predicted(g, file, filters_factory):
+    filter_fn = filters_factory.get_filter(FilterType.PREDICTED)
+    try:
+        p_entries = PredictedEntry.generate_from_file(g, file)
+        p_entries = filter(filter_fn, p_entries)
+        return p_entries
     except Exception as ex:
         print("ERROR: parse blk data" + repr(ex))
 
@@ -60,47 +75,64 @@ def parse_block_io_size_per_time(g, blk_data):
     Plotter.block_time_io_plot(io_time, io_size, g.parseaction)
     
 
+def load_predicted(g):
+    predicted = PairSet()
+    with open(g.pp_file, "r") as file:
+            p_data = load_filtered_data_predicted(g, file, FiltersFactory(g))
+            for [_, p_sector, p_size] in p_data:
+                predicted.insert(Item(p_sector, p_size / g.weight))
+    return predicted
+
+
+def process_detect(g, blk_prev, blk_cur, detector: SeqDetector):
+    detector.set_blk(blk_prev)
+    if detector.detect(blk_cur):
+        if g.cut_seq:
+            return True # Continue 
+    else:
+        detector.collect()
+    
+    return False # Nor Continue
+
 
 def parse_time_lba(g, blk_data):   
     counter = 0
     lba_data = []
-    lba_data.append(Plotter.ConfigLbaOp([], [], [], "blue", "R({})".format(g.selected_thread)))
-    lba_data.append(Plotter.ConfigLbaOp([], [], [], "red", "W({})".format(g.selected_thread)))
+    lba_data.append(Plotter.ConfigLbaOp([], [], [], "blue", "green", "R({})".format(g.selected_thread)))
+    lba_data.append(Plotter.ConfigLbaOp([], [], [], "red", "green", "W({})".format(g.selected_thread)))
     blk_iter = iter(blk_data)
     blk_cur = next(blk_iter) 
 
     seq_read = SeqDetector("R")
     seq_write = SeqDetector("W")
+
+    predicted = PairSet()
+    if g.with_predicted:
+        predicted = load_predicted(g)
+
     while True:
         try:        
             blk_prev = blk_cur
             blk_cur = next(blk_iter)
 
             counter += 1
-    
-            seq_read.set_blk(blk_prev)
-            if seq_read.detect(blk_cur):
-                if g.cut_seq:
-                    continue
-            else:
-                seq_read.collect()
 
-            seq_write.set_blk(blk_prev)
-            if seq_write.detect(blk_cur):
-                if g.cut_seq:
-                    continue
-            else:
-                seq_write.collect()
+            if process_detect(g, blk_prev, blk_cur, seq_read):
+                continue
+            if process_detect(g, blk_prev, blk_cur, seq_write):
+                continue
 
             lba, size = blk_prev.get_lba_blocks()
             time = blk_prev.time
             op = blk_prev.rwbs
             time_step = (blk_cur.time - blk_prev.time) / (size / 8)
-            size += 1
 
+            is_predicted: bool = g.with_predicted and (Item(lba, size) in predicted)
+            
+            size += 1
             for step in range(0, size, 8):
                 is_write = int(op in ("W", "WS"))
-                lba_data[is_write].lba_axis_data.append(lba + step)
+                lba_data[is_write].lba_axis_data.append(Plotter.LbaPack(lba + step, is_predicted))
                 lba_data[is_write].time_axis.append(time)
                 time += time_step
         except StopIteration:
@@ -117,7 +149,7 @@ def parse_time_lba(g, blk_data):
 
 def to_parse_blk_info(g):
     with open(g.parsefile, "r") as file:
-        blk_data = load_filtered_data(g, file, FiltersFactory(g))
+        blk_data = load_filtered_data_simple(g, file, FiltersFactory(g))
         if not blk_data:
             return
 
