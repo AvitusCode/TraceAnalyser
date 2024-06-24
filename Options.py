@@ -60,7 +60,9 @@ class pIONOptions(object):
         self.buffer_size        = 1024         # blktrace buffer size
         self.buffer_count       = 8            # blktrace buffer count
         self.thread_mode        = False        # Parse data only for a specific thread
+        self.cpu_mode           = False        # Parse data only for a specific cpu
         self.selected_thread    = 0            # A selected thread
+        self.selected_cpu       = 0            # A selected cpu
 
         # plot settings
         self.x_width            = 1280          # plot x-width

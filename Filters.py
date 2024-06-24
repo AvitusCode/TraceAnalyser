@@ -120,6 +120,8 @@ class FiltersFactory(object):
             
             if self.g.thread_mode:
                 is_pass = is_pass and entry.pid == self.g.selected_thread
+            if self.g.cpu_mode:
+                is_pass = is_pass and entry.cpu == self.g.selected_cpu
 
             is_pass = is_pass and (self.g.time_period_start <= entry.time <= self.g.time_period_end)
             is_pass = is_pass and (self.g.sector_start <= entry.sector <= self.g.sector_end)
@@ -127,7 +129,7 @@ class FiltersFactory(object):
             return is_pass
         
         def p_filter_fn(entry):
-            if self.g.thread_mode:
+            if not self.g.thread_mode:
                 return True
             return self.g.selected_thread == entry.pid
 

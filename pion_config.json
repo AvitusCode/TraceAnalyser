@@ -15,7 +15,9 @@
     "parse_mode": "tlba",
     "cut_seq": false,
     "thread_mode": false,
+    "cpu_mode": true,
     "selected_thread": 0,
+    "selected_cpu": 1,
     "with_predicted": false,
     "pp_file": "traces/predicted_vps26020.blktrace.0_nd"
 }

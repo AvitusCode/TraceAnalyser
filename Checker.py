@@ -117,7 +117,9 @@ def load_config(g):
             g.cut_seq = bool(settings["cut_seq"])
             g.time_cover = float(settings["time_cover"])
             g.thread_mode = bool(settings["thread_mode"])
+            g.cpu_mode = bool(settings["cpu_mode"])
             g.selected_thread = int(settings["selected_thread"])
+            g.selected_cpu = int(settings["selected_cpu"])
             g.with_predicted = bool(settings["with_predicted"])
             g.pp_file = settings["pp_file"]
 

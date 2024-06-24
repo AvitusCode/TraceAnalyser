@@ -95,14 +95,36 @@ def process_detect(g, blk_prev, blk_cur, detector: SeqDetector):
     return False # Nor Continue
 
 
+class SingletonIterator(object):
+    """Proxy iterator to allow 'iteration' over a fictitious sequence
+    holding a single element, the `value`."""
+    def __init__(self, value):
+        self._value = value
+        self._yielded = False
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._yielded:
+            raise StopIteration
+        self._yielded = True
+        return self._value
+    
+
 def parse_time_lba(g, blk_data):   
     counter = 0
     lba_data = []
     lba_data.append(Plotter.ConfigLbaOp([], [], [], "blue", "green", "R({})".format(g.selected_thread)))
     lba_data.append(Plotter.ConfigLbaOp([], [], [], "red", "green", "W({})".format(g.selected_thread)))
     blk_iter = iter(blk_data)
-    blk_cur = next(blk_iter) 
-
+    
+    try: 
+        blk_cur = next(blk_iter)
+    except StopIteration:
+        print("Error: empty generator")
+        return
+    
     seq_read = SeqDetector("R")
     seq_write = SeqDetector("W")
 
